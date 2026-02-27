@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>The World’s Most Pointless Homepage</title>
+  <title>NoahGross.com</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     :root {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
         sans-serif;
-      background: #060606;
-      color: #f5f5f5;
+      background: #ffffff;
+      color: #111111;
     }
 
     body {
@@ -18,147 +18,88 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      background: #ffffff;
     }
 
-    .wrapper {
-      text-align: center;
-      padding: 24px;
-      max-width: 600px;
-    }
-
-    h1 {
-      font-size: clamp(2rem, 5vw, 3rem);
-      margin-bottom: 12px;
-    }
-
-    p {
-      margin: 8px 0;
-      line-height: 1.5;
-      color: #cccccc;
-    }
-
-    .counter {
-      margin-top: 24px;
-      font-size: 0.95rem;
-      opacity: 0.85;
-    }
-
-    .counter strong {
-      font-size: 1.1rem;
-    }
-
-    .button-area {
-      margin-top: 32px;
-      height: 140px;
+    .playground {
       position: relative;
+      width: 100%;
+      height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
     }
 
-    /* Bright visible button */
+    /* Big, obvious central button */
     #runaway-btn {
       position: absolute;
-      padding: 12px 22px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      padding: 16px 32px;
       border-radius: 999px;
       border: none;
       background: #1a73e8;
       color: #ffffff;
       font-weight: 600;
       cursor: pointer;
-      font-size: 0.95rem;
-      box-shadow: 0 4px 10px #0005;
-      transition: transform 0.1s ease-out, background 0.2s;
+      font-size: 1.1rem;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+      transition: transform 0.1s ease-out, background 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
     }
 
     #runaway-btn:hover {
       background: #4285f4;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
     }
 
     #runaway-btn:active {
-      transform: scale(0.96);
+      transform: translate(-50%, -50%) scale(0.97);
     }
 
-    .hint {
-      margin-top: 10px;
-      font-size: 0.8rem;
-      opacity: 0.7;
-    }
-
-    /* BIG BOLD red final message */
+    /* Final message after the button disappears */
     #bye-message {
       display: none;
-      margin-top: 20px;
-      font-size: 2rem;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2.2rem;
       font-weight: 700;
       color: #ff5252;
+      text-align: center;
       opacity: 0;
       transition: opacity 0.8s ease;
-    }
-
-    footer {
-      margin-top: 40px;
-      font-size: 0.8rem;
-      opacity: 0.6;
+      pointer-events: none;
+      padding: 0 16px;
     }
   </style>
 </head>
 <body>
-  <div class="wrapper">
-    <h1>The World’s Most Pointless Homepage</h1>
-    <p>You made it. This is the whole website.</p>
-    <p>There is nothing to click that will help your life in any meaningful way.</p>
-
-    <div class="counter">
-      Visitors before you: <strong id="visitor-count">…</strong><br />
-      <span>All equally confused. You’re in good company.</span>
-    </div>
-
-    <div class="button-area" id="button-area">
-      <button id="runaway-btn">Click here to enter</button>
-      <div class="hint">(Go on. See what happens.)</div>
-      <div id="bye-message">The button has left the chat.</div>
-    </div>
-
-    <footer>
-      If you were expecting a serious personal site, that’s on you.<br />
-      <span style="opacity:0.5;">You can safely close this tab now.</span>
-    </footer>
+  <div class="playground" id="playground">
+    <button id="runaway-btn">Click here to enter website</button>
+    <div id="bye-message">The button has left the chat.</div>
   </div>
 
   <script>
-    // Visitor counter
-    (function () {
-      const KEY = "noahgross_pointless_visitors";
-      let count = parseInt(localStorage.getItem(KEY), 10);
-
-      if (isNaN(count)) {
-        count = Math.floor(1000 + Math.random() * 9000);
-      } else {
-        count += 1;
-      }
-
-      localStorage.setItem(KEY, count);
-      document.getElementById("visitor-count").textContent =
-        count.toLocaleString();
-    })();
-
-    // Runaway button + trash talk + disappearance
     (function () {
       const btn = document.getElementById("runaway-btn");
-      const area = document.getElementById("button-area");
+      const area = document.getElementById("playground");
       const bye = document.getElementById("bye-message");
 
       let attempts = 0;
+      const maxAttempts = 10;
+
       const messages = [
-        "Click here to enter",
-        "Almost.",
-        "Not even close.",
-        "Bro… stop.",
-        "This website is not for you.",
-        "Try again tomorrow.",
-        "Seriously? This is what you’re doing with your day?"
+        "Click here to enter website",                         // 0 - initial
+        "Almost.",                                             // 1
+        "Not even close.",                                     // 2
+        "Bro… stop.",                                          // 3
+        "This website is not for you.",                        // 4
+        "Try again tomorrow.",                                 // 5
+        "Seriously? This is what you’re doing with your day?"  // 6+
       ];
 
       function updateMessage() {
@@ -167,36 +108,47 @@
       }
 
       function moveButton(increment = true) {
-        if (attempts >= 10) return;
+        if (attempts >= maxAttempts) return;
 
         const areaRect = area.getBoundingClientRect();
         const btnRect = btn.getBoundingClientRect();
-        const padding = 10;
+
+        const padding = 20; // keep some margin from edges
 
         const maxX = areaRect.width - btnRect.width - padding;
         const maxY = areaRect.height - btnRect.height - padding;
 
-        btn.style.left = Math.random() * maxX + "px";
-        btn.style.top = Math.random() * maxY + "px";
+        const newX = padding + Math.random() * maxX;
+        const newY = padding + Math.random() * maxY;
+
+        // remove the centering transform after first move
+        btn.style.transform = "none";
+        btn.style.left = newX + "px";
+        btn.style.top = newY + "px";
 
         if (increment) {
           attempts++;
           updateMessage();
 
-          // On attempt #10: button vanishes, giant message fades in
-          if (attempts === 10) {
+          if (attempts === maxAttempts) {
+            // Hide button, show final message
             btn.style.display = "none";
             bye.style.display = "block";
-            setTimeout(() => (bye.style.opacity = "1"), 50);
+            setTimeout(() => {
+              bye.style.opacity = "1";
+            }, 50);
           }
         }
       }
 
-      moveButton(false);
+      // Start centered, first move happens on hover
+      updateMessage();
 
+      // Run whenever mouse gets near the button
       btn.addEventListener("mouseover", () => moveButton(true));
       btn.addEventListener("mouseenter", () => moveButton(true));
 
+      // If they somehow manage to click it…
       btn.addEventListener("click", function () {
         alert("Impossible. You weren’t supposed to catch it.");
       });
