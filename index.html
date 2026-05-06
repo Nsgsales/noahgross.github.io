@@ -24,7 +24,7 @@
     .container {
       max-width: 480px;
       width: 100%;
-      text-align: left;
+      text-align: center;
     }
 
     .prompt {
@@ -36,43 +36,54 @@
     }
 
     .reasons {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 32px 0;
+      list-style: disc;
+      margin: 0 auto 24px auto;
+      padding: 0 0 0 1.4em;
+      display: inline-block;
+      text-align: left;
     }
 
     .reasons li {
       font-size: 1.05rem;
-      color: #444;
-      padding: 6px 0;
-      border-bottom: 1px solid #f0f0f0;
+      font-weight: 700;
+      color: #111;
+      padding: 5px 0;
     }
 
-    .reasons li:last-child {
-      border-bottom: none;
+    .cta-text {
+      font-size: 1rem;
+      color: #444;
+      margin: 0 0 24px 0;
     }
 
     .enter-btn {
       display: inline-block;
       padding: 14px 36px;
       border-radius: 999px;
-      border: 2px solid #111;
-      background: #fff;
-      color: #111;
+      border: none;
+      background: #2563eb;
+      color: #fff;
       font-weight: 600;
       font-size: 1rem;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-      transition: background 0.18s, color 0.18s, box-shadow 0.18s;
-      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+      transition: background 0.18s, box-shadow 0.18s, opacity 0.4s ease;
       user-select: none;
     }
 
-    .enter-btn:hover,
-    .enter-btn:active {
-      background: #111;
-      color: #fff;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    .enter-btn:hover {
+      background: #1d4ed8;
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+    }
+
+    .bye-message {
+      display: none;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #ff5252;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      line-height: 1.35;
     }
 
     @media (max-width: 480px) {
@@ -96,7 +107,25 @@
       <li>Wrong tab</li>
       <li>FBI</li>
     </ul>
+    <p class="cta-text">Either way, click below to enter the site.</p>
     <button class="enter-btn">Enter the site</button>
+    <div class="bye-message">Welcome. The wi-fi gets worse from here.</div>
   </div>
+
+  <script>
+    (function () {
+      var btn = document.querySelector('.enter-btn');
+      var bye = document.querySelector('.bye-message');
+
+      btn.addEventListener('click', function () {
+        btn.style.opacity = '0';
+        setTimeout(function () {
+          btn.style.display = 'none';
+          bye.style.display = 'block';
+          setTimeout(function () { bye.style.opacity = '1'; }, 50);
+        }, 400);
+      });
+    })();
+  </script>
 </body>
 </html>
