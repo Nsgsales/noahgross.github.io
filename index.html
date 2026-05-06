@@ -79,10 +79,8 @@
     #bye-message {
       display: none;
       position: absolute;
-      left: 50%;
-      top: 50%;
       transform: translate(-50%, -50%);
-      font-size: 2rem;
+      font-size: 1.6rem;
       font-weight: 700;
       color: #ff5252;
       text-align: center;
@@ -178,6 +176,14 @@
       function enterSite(btn) {
         var msg = btn.getAttribute("data-msg");
 
+        // Position message where the button currently is
+        var pgRect = playground.getBoundingClientRect();
+        var btnRect = btn.getBoundingClientRect();
+        var cx = btnRect.left - pgRect.left + btnRect.width / 2;
+        var cy = btnRect.top - pgRect.top + btnRect.height / 2;
+        bye.style.left = cx + "px";
+        bye.style.top = cy + "px";
+
         header.style.opacity = "0";
         buttons.forEach(function (b) { b.style.opacity = "0"; });
 
@@ -195,26 +201,13 @@
         var ph = playground.offsetHeight;
         var topPad = 110;
         var availH = ph - topPad;
-        var isMobile = pw < 640;
 
-        // 2x2 grid positions for desktop, vertical stack for mobile
-        var initialPositions = isMobile
-          ? buttons.map(function (btn, i) {
-              var bw = btn.offsetWidth || 200;
-              var bh = btn.offsetHeight || 52;
-              return { x: Math.max(0, (pw - bw) / 2), y: topPad + i * (bh + 16) + 16 };
-            })
-          : [
-              { x: pw * 0.12, y: topPad + availH * 0.18 },
-              { x: pw * 0.52, y: topPad + availH * 0.18 },
-              { x: pw * 0.12, y: topPad + availH * 0.55 },
-              { x: pw * 0.52, y: topPad + availH * 0.55 }
-            ];
-
+        // All buttons stacked vertically, centered
         buttons.forEach(function (btn, i) {
-          var pos = initialPositions[i];
-          btn.style.left = pos.x + "px";
-          btn.style.top = pos.y + "px";
+          var bw = btn.offsetWidth || 220;
+          var bh = btn.offsetHeight || 52;
+          btn.style.left = Math.max(0, (pw - bw) / 2) + "px";
+          btn.style.top = (topPad + 16 + i * (bh + 14)) + "px";
 
           btn._onEnter = function () { moveButton(btn); };
           btn.addEventListener("mouseenter", btn._onEnter);
