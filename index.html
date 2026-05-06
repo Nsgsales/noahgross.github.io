@@ -5,125 +5,238 @@
   <title>NoahGross.com</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       margin: 0;
       background: #fff;
       color: #111;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px 20px;
+      overflow: hidden;
     }
 
-    .container {
-      max-width: 480px;
-      width: 100%;
+    #playground {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #header {
+      position: absolute;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
       text-align: center;
+      z-index: 10;
+      pointer-events: none;
+      width: 90%;
+      max-width: 480px;
+      transition: opacity 0.4s ease;
     }
 
-    .prompt {
+    #prompt-text {
       font-size: 1.4rem;
       font-weight: 700;
       color: #111;
-      margin: 0 0 20px 0;
+      margin: 0 0 14px 0;
       line-height: 1.3;
     }
 
     .reasons {
       list-style: disc;
-      margin: 0 auto 24px auto;
-      padding: 0 0 0 1.4em;
       display: inline-block;
       text-align: left;
+      margin: 0 0 14px 0;
+      padding: 0 0 0 1.4em;
     }
 
     .reasons li {
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 700;
       color: #111;
-      padding: 5px 0;
+      padding: 4px 0;
     }
 
-    .cta-text {
-      font-size: 1rem;
+    #cta-text {
+      font-size: 0.95rem;
       color: #444;
-      margin: 0 0 24px 0;
+      margin: 0;
     }
 
-    .enter-btn {
-      display: inline-block;
-      padding: 14px 36px;
+    #status-msg {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #ff5252;
+      margin-top: 8px;
+      min-height: 1.5em;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .entry-btn {
+      position: absolute;
+      padding: 15px 32px;
       border-radius: 999px;
       border: none;
       background: #2563eb;
       color: #fff;
       font-weight: 600;
       font-size: 1rem;
-      cursor: pointer;
+      cursor: default;
       box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
-      transition: background 0.18s, box-shadow 0.18s, opacity 0.4s ease;
+      white-space: nowrap;
       user-select: none;
+      transition: left 0.1s ease-out, top 0.1s ease-out, opacity 0.4s ease;
     }
 
-    .enter-btn:hover {
+    .entry-btn.catchable {
+      cursor: pointer;
+      transition: background 0.18s, box-shadow 0.18s, opacity 0.4s ease;
+    }
+
+    .entry-btn.catchable:hover {
       background: #1d4ed8;
-      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
     }
 
-    .bye-message {
+    #bye-message {
       display: none;
-      font-size: 1.5rem;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.6rem;
       font-weight: 700;
       color: #ff5252;
+      text-align: center;
       opacity: 0;
       transition: opacity 0.8s ease;
+      max-width: 540px;
       line-height: 1.35;
+      padding: 0 20px;
     }
 
     @media (max-width: 480px) {
-      .prompt {
-        font-size: 1.2rem;
-      }
-      .reasons li {
-        font-size: 1rem;
-      }
+      #prompt-text { font-size: 1.2rem; }
+      .reasons li  { font-size: 0.95rem; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <p class="prompt">If you're here, one of the following probably happened:</p>
-    <ul class="reasons">
-      <li>I emailed you and you got curious</li>
-      <li>You Googled me</li>
-      <li>You wanted to see if this domain was real</li>
-      <li>Stalking me?</li>
-      <li>Wrong tab</li>
-      <li>FBI</li>
-    </ul>
-    <p class="cta-text">Either way, click below to enter the site.</p>
-    <button class="enter-btn">Enter the site</button>
-    <div class="bye-message">Welcome. The wi-fi gets worse from here.</div>
+  <div id="playground">
+    <div id="header">
+      <div id="prompt-text">If you're here, one of the following probably happened:</div>
+      <ul class="reasons">
+        <li>I emailed you and you got curious</li>
+        <li>You Googled me</li>
+        <li>You wanted to see if this domain was real</li>
+        <li>Stalking me?</li>
+        <li>Wrong tab</li>
+        <li>FBI</li>
+      </ul>
+      <div id="cta-text">Either way, click below to enter the site.</div>
+      <div id="status-msg"></div>
+    </div>
+
+    <button class="entry-btn">Enter the site</button>
+
+    <div id="bye-message">Welcome. The wi-fi gets worse from here.</div>
   </div>
 
   <script>
     (function () {
-      var btn = document.querySelector('.enter-btn');
-      var bye = document.querySelector('.bye-message');
+      var playground = document.getElementById("playground");
+      var header     = document.getElementById("header");
+      var statusEl   = document.getElementById("status-msg");
+      var bye        = document.getElementById("bye-message");
+      var btn        = document.querySelector(".entry-btn");
 
-      btn.addEventListener('click', function () {
-        btn.style.opacity = '0';
+      var attempts   = 0;
+      var maxAttempts = 9;
+      var topPad     = 110;
+
+      var runMessages = [
+        "Almost.",
+        "Not even close.",
+        "Bro… stop.",
+        "They can sense desperation.",
+        "This website is not for you.",
+        "Try again tomorrow.",
+        "Seriously? This is what you’re doing with your day?",
+        "Fine. You’ve earned it.",
+        "Okay. It gives up."
+      ];
+
+      function setStatus(msg) {
+        statusEl.style.opacity = "0";
         setTimeout(function () {
-          btn.style.display = 'none';
-          bye.style.display = 'block';
-          setTimeout(function () { bye.style.opacity = '1'; }, 50);
-        }, 400);
+          statusEl.textContent = msg;
+          statusEl.style.opacity = "1";
+        }, 150);
+      }
+
+      function randomPos() {
+        var pw  = playground.offsetWidth;
+        var ph  = playground.offsetHeight;
+        var bw  = btn.offsetWidth  || 180;
+        var bh  = btn.offsetHeight || 52;
+        var pad = 24;
+        return {
+          x: pad + Math.random() * Math.max(0, pw - bw - pad * 2),
+          y: topPad + Math.random() * Math.max(0, ph - bh - topPad - pad)
+        };
+      }
+
+      function moveButton() {
+        if (attempts >= maxAttempts) return;
+        var pos = randomPos();
+        btn.style.left = pos.x + "px";
+        btn.style.top  = pos.y + "px";
+        attempts++;
+        setStatus(runMessages[Math.min(attempts - 1, runMessages.length - 1)]);
+        if (attempts >= maxAttempts) makeCatchable();
+      }
+
+      function makeCatchable() {
+        btn.classList.add("catchable");
+        btn.removeEventListener("mouseenter", onEnter);
+      }
+
+      function enterSite() {
+        header.style.opacity = "0";
+        btn.style.opacity    = "0";
+        setTimeout(function () {
+          header.style.display = "none";
+          btn.style.display    = "none";
+          bye.style.display    = "block";
+          setTimeout(function () { bye.style.opacity = "1"; }, 50);
+        }, 500);
+      }
+
+      function onEnter() { moveButton(); }
+
+      window.addEventListener("load", function () {
+        topPad = header.offsetHeight + 30;
+        var pw = playground.offsetWidth;
+        var bw = btn.offsetWidth || 220;
+        btn.style.left = Math.max(0, (pw - bw) / 2) + "px";
+        btn.style.top  = (topPad + 16) + "px";
+
+        btn.addEventListener("mouseenter", onEnter);
+
+        btn.addEventListener("touchstart", function (e) {
+          if (!btn.classList.contains("catchable")) {
+            e.preventDefault();
+            moveButton();
+          }
+        }, { passive: false });
+
+        btn.addEventListener("click", function () {
+          if (btn.classList.contains("catchable")) {
+            enterSite();
+          } else {
+            moveButton();
+          }
+        });
       });
     })();
   </script>
