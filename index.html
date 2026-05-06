@@ -22,7 +22,7 @@
 
     #header {
       position: absolute;
-      top: 36px;
+      top: 24px;
       left: 50%;
       transform: translateX(-50%);
       text-align: center;
@@ -33,18 +33,17 @@
     }
 
     #prompt-text {
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: #888;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #111;
+      letter-spacing: -0.01em;
     }
 
     #status-msg {
       font-size: 1.15rem;
       font-weight: 700;
       color: #ff5252;
-      margin-top: 10px;
+      margin-top: 6px;
       min-height: 1.5em;
       opacity: 0;
       transition: opacity 0.25s ease;
@@ -105,6 +104,7 @@
     <button class="entry-btn" data-msg="Bold. Most people at least stalk the LinkedIn first.">You Googled me?</button>
     <button class="entry-btn" data-msg="Same. It&rsquo;s a great email. Very enigmatic. Moving on.">Curious about my email?</button>
     <button class="entry-btn" data-msg="Congratulations. You&rsquo;ve made it. The wi-fi gets worse from here.">Just reached the end of the internet?</button>
+    <button class="entry-btn" data-msg="Sure. We&rsquo;ll say that.">Other?</button>
 
     <div id="bye-message"></div>
   </div>
@@ -146,7 +146,7 @@
         var bw = btn.offsetWidth || 180;
         var bh = btn.offsetHeight || 52;
         var pad = 24;
-        var topPad = 130;
+        var topPad = 110;
 
         return {
           x: pad + Math.random() * Math.max(0, pw - bw - pad * 2),
@@ -193,22 +193,28 @@
       window.addEventListener("load", function () {
         var pw = playground.offsetWidth;
         var ph = playground.offsetHeight;
-        var topPad = 130;
-        var centerY = topPad + (ph - topPad) / 2;
-        var isMobile = pw < 600;
+        var topPad = 110;
+        var availH = ph - topPad;
+        var isMobile = pw < 640;
+
+        // 2x2 grid positions for desktop, vertical stack for mobile
+        var initialPositions = isMobile
+          ? buttons.map(function (btn, i) {
+              var bw = btn.offsetWidth || 200;
+              var bh = btn.offsetHeight || 52;
+              return { x: Math.max(0, (pw - bw) / 2), y: topPad + i * (bh + 16) + 16 };
+            })
+          : [
+              { x: pw * 0.12, y: topPad + availH * 0.18 },
+              { x: pw * 0.52, y: topPad + availH * 0.18 },
+              { x: pw * 0.12, y: topPad + availH * 0.55 },
+              { x: pw * 0.52, y: topPad + availH * 0.55 }
+            ];
 
         buttons.forEach(function (btn, i) {
-          var bw = btn.offsetWidth || 180;
-          var bh = btn.offsetHeight || 52;
-
-          if (isMobile) {
-            btn.style.left = Math.max(0, (pw - bw) / 2) + "px";
-            btn.style.top = (topPad + i * (bh + 18) + 10) + "px";
-          } else {
-            var slot = pw / 3;
-            btn.style.left = (slot * i + Math.max(0, slot - bw) / 2) + "px";
-            btn.style.top = Math.max(topPad, centerY - bh / 2) + "px";
-          }
+          var pos = initialPositions[i];
+          btn.style.left = pos.x + "px";
+          btn.style.top = pos.y + "px";
 
           btn._onEnter = function () { moveButton(btn); };
           btn.addEventListener("mouseenter", btn._onEnter);
