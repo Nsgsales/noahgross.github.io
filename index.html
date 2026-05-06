@@ -5,128 +5,221 @@
   <title>NoahGross.com</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    :root {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #ffffff;
-      color: #111111;
-    }
-
     body {
       margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #ffffff;
+      background: #fff;
+      color: #111;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden;
     }
 
-    .playground {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      padding: 32px 24px;
+    #playground {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #header {
+      position: absolute;
+      top: 36px;
+      left: 50%;
+      transform: translateX(-50%);
       text-align: center;
+      z-index: 10;
+      pointer-events: none;
+      white-space: nowrap;
+      transition: opacity 0.4s ease;
     }
 
     #prompt-text {
-      font-size: 1rem;
+      font-size: 0.9rem;
       font-weight: 500;
-      color: #555;
-      letter-spacing: 0.02em;
+      color: #888;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      margin-bottom: 8px;
     }
 
-    #btn-group {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      transition: opacity 0.5s ease;
+    #status-msg {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #ff5252;
+      margin-top: 10px;
+      min-height: 1.5em;
+      opacity: 0;
+      transition: opacity 0.25s ease;
     }
 
     .entry-btn {
-      padding: 16px 36px;
+      position: absolute;
+      padding: 15px 32px;
       border-radius: 999px;
       border: 2px solid #111;
-      background: #ffffff;
-      color: #111111;
+      background: #fff;
+      color: #111;
       font-weight: 600;
-      cursor: pointer;
       font-size: 1rem;
+      cursor: default;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-      transition: background 0.18s, color 0.18s, transform 0.12s, box-shadow 0.18s;
       white-space: nowrap;
+      user-select: none;
+      transition: left 0.1s ease-out, top 0.1s ease-out, opacity 0.4s ease;
     }
 
-    .entry-btn:hover {
-      background: #111111;
-      color: #ffffff;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
-      transform: translateY(-2px);
+    .entry-btn.catchable {
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s, box-shadow 0.18s, opacity 0.4s ease;
     }
 
-    .entry-btn:active {
-      transform: translateY(0px) scale(0.97);
+    .entry-btn.catchable:hover {
+      background: #111;
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
     }
 
     #bye-message {
       display: none;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
       font-size: 2rem;
       font-weight: 700;
       color: #ff5252;
       text-align: center;
       opacity: 0;
       transition: opacity 0.8s ease;
-      max-width: 520px;
+      max-width: 540px;
       line-height: 1.35;
-      padding: 0 16px;
+      padding: 0 20px;
     }
   </style>
 </head>
 <body>
-  <div class="playground">
-    <div id="prompt-text">Please state the nature of your visit</div>
-    <div id="btn-group">
-      <button class="entry-btn" data-msg="Bold. Most people at least stalk the LinkedIn first.">
-        You Googled me?
-      </button>
-      <button class="entry-btn" data-msg="Same. It&rsquo;s a great email. Very enigmatic. Moving on.">
-        Curious about my email?
-      </button>
-      <button class="entry-btn" data-msg="Congratulations. You&rsquo;ve made it. The wi-fi gets worse from here.">
-        Just reached the end of the internet?
-      </button>
+  <div id="playground">
+    <div id="header">
+      <div id="prompt-text">Please state the nature of your visit</div>
+      <div id="status-msg"></div>
     </div>
+
+    <button class="entry-btn" data-msg="Bold. Most people at least stalk the LinkedIn first.">You Googled me?</button>
+    <button class="entry-btn" data-msg="Same. It&rsquo;s a great email. Very enigmatic. Moving on.">Curious about my email?</button>
+    <button class="entry-btn" data-msg="Congratulations. You&rsquo;ve made it. The wi-fi gets worse from here.">Just reached the end of the internet?</button>
+
     <div id="bye-message"></div>
   </div>
 
   <script>
     (function () {
-      const group = document.getElementById("btn-group");
-      const prompt = document.getElementById("prompt-text");
+      const playground = document.getElementById("playground");
+      const header = document.getElementById("header");
+      const statusEl = document.getElementById("status-msg");
       const bye = document.getElementById("bye-message");
+      const buttons = Array.from(document.querySelectorAll(".entry-btn"));
 
-      document.querySelectorAll(".entry-btn").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          const msg = btn.getAttribute("data-msg");
+      let attempts = 0;
+      const maxAttempts = 9;
 
-          // Fade out all buttons and prompt
-          group.style.opacity = "0";
-          prompt.style.opacity = "0";
-          prompt.style.transition = "opacity 0.4s ease";
+      const runMessages = [
+        "Almost.",
+        "Not even close.",
+        "Bro… stop.",
+        "They can sense desperation.",
+        "This website is not for you.",
+        "Try again tomorrow.",
+        "Seriously? This is what you’re doing with your day?",
+        "Fine. You’ve earned it. Pick one.",
+        "Okay. They give up."
+      ];
 
-          setTimeout(function () {
-            group.style.display = "none";
-            prompt.style.display = "none";
+      function setStatus(msg) {
+        statusEl.style.opacity = "0";
+        setTimeout(function () {
+          statusEl.textContent = msg;
+          statusEl.style.opacity = "1";
+        }, 150);
+      }
 
-            bye.innerHTML = msg;
-            bye.style.display = "block";
-            setTimeout(function () {
-              bye.style.opacity = "1";
-            }, 50);
-          }, 500);
+      function randomPos(btn) {
+        var pw = playground.offsetWidth;
+        var ph = playground.offsetHeight;
+        var bw = btn.offsetWidth || 180;
+        var bh = btn.offsetHeight || 52;
+        var pad = 24;
+        var topPad = 130;
+
+        return {
+          x: pad + Math.random() * Math.max(0, pw - bw - pad * 2),
+          y: topPad + Math.random() * Math.max(0, ph - bh - topPad - pad)
+        };
+      }
+
+      function moveButton(btn) {
+        if (attempts >= maxAttempts) return;
+        var pos = randomPos(btn);
+        btn.style.left = pos.x + "px";
+        btn.style.top = pos.y + "px";
+
+        attempts++;
+        setStatus(runMessages[Math.min(attempts - 1, runMessages.length - 1)]);
+
+        if (attempts >= maxAttempts) {
+          makeCatchable();
+        }
+      }
+
+      function makeCatchable() {
+        buttons.forEach(function (btn) {
+          btn.classList.add("catchable");
+          btn.removeEventListener("mouseenter", btn._onEnter);
+        });
+      }
+
+      function enterSite(btn) {
+        var msg = btn.getAttribute("data-msg");
+
+        header.style.opacity = "0";
+        buttons.forEach(function (b) { b.style.opacity = "0"; });
+
+        setTimeout(function () {
+          header.style.display = "none";
+          buttons.forEach(function (b) { b.style.display = "none"; });
+          bye.innerHTML = msg;
+          bye.style.display = "block";
+          setTimeout(function () { bye.style.opacity = "1"; }, 50);
+        }, 500);
+      }
+
+      window.addEventListener("load", function () {
+        var pw = playground.offsetWidth;
+        var ph = playground.offsetHeight;
+        var topPad = 130;
+        var centerY = topPad + (ph - topPad) / 2;
+        var isMobile = pw < 600;
+
+        buttons.forEach(function (btn, i) {
+          var bw = btn.offsetWidth || 180;
+          var bh = btn.offsetHeight || 52;
+
+          if (isMobile) {
+            btn.style.left = Math.max(0, (pw - bw) / 2) + "px";
+            btn.style.top = (topPad + i * (bh + 18) + 10) + "px";
+          } else {
+            var slot = pw / 3;
+            btn.style.left = (slot * i + Math.max(0, slot - bw) / 2) + "px";
+            btn.style.top = Math.max(topPad, centerY - bh / 2) + "px";
+          }
+
+          btn._onEnter = function () { moveButton(btn); };
+          btn.addEventListener("mouseenter", btn._onEnter);
+
+          btn.addEventListener("click", function () {
+            if (btn.classList.contains("catchable")) {
+              enterSite(btn);
+            } else {
+              moveButton(btn);
+            }
+          });
         });
       });
     })();
