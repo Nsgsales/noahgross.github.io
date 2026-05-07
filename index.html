@@ -57,12 +57,43 @@
     }
 
     .reason {
+      position: relative;
       font-size: 1.02rem;
       color: #444444;
       padding: 8px 16px;
       border-radius: 999px;
       background: #f5f5f5;
       border: 1px solid #ececec;
+      cursor: default;
+      transition: all 0.2s ease;
+    }
+
+    .reason:hover {
+      background: #111111;
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .reason::after {
+      content: attr(data-hover);
+      position: absolute;
+      left: 50%;
+      top: calc(100% + 8px);
+      transform: translateX(-50%);
+      background: #111111;
+      color: #ffffff;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 20;
+    }
+
+    .reason:hover::after {
+      opacity: 1;
     }
 
     .enter-line {
@@ -124,8 +155,15 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @media (max-width: 640px) {
@@ -151,6 +189,13 @@
       .reason {
         font-size: 0.92rem;
         padding: 7px 13px;
+      }
+
+      .reason::after {
+        font-size: 0.78rem;
+        max-width: calc(100vw - 40px);
+        white-space: normal;
+        width: max-content;
       }
 
       .enter-line {
@@ -180,12 +225,29 @@
       <h1>If you’re here,<br>one of these probably happened.</h1>
 
       <div class="reasons">
-        <div class="reason">I emailed you and you got curious</div>
-        <div class="reason">You Googled me</div>
-        <div class="reason">You wanted to see if this domain was real</div>
-        <div class="reason">Stalking me?</div>
-        <div class="reason">Wrong tab</div>
-        <div class="reason">FBI</div>
+        <div class="reason" data-hover="Honestly, fair.">
+          I emailed you and you got curious
+        </div>
+
+        <div class="reason" data-hover="Dangerous amount of free time.">
+          You Googled me
+        </div>
+
+        <div class="reason" data-hover="Surprisingly, yes.">
+          You wanted to see if this domain was real
+        </div>
+
+        <div class="reason" data-hover="At least you’re being upfront about it.">
+          Stalking me?
+        </div>
+
+        <div class="reason" data-hover="Happens more than you’d think.">
+          Wrong tab
+        </div>
+
+        <div class="reason" data-hover="I invoke my right to remain confusing.">
+          FBI
+        </div>
       </div>
 
       <div class="enter-line">
